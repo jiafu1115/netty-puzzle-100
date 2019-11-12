@@ -5,9 +5,9 @@
 （1）对于单个客户端（IP地址固定）而言：
     理论值：单个客户端连接到一个服务器最多连接数取决于本地可用端口数（因为其他3个元素固定了）： 65535（报文中端口占用字节数是16，所以最大端口数65535）- 1024(保留端口，不给用) 约 64K。
     实际值：取决于以下三个方面：
-            1）TCP层：ip_local_port_range (参考/proc/sys/net/ipv4/ip_local_port_range)，可调整;
-            2）系统限制：最大文件句柄数（参考/etc/security/limits.conf），可调整;
-            3）资源限制：内存等资源有限，例如连接本身占用资源，Netty本身的socket相关的对象也占用jvm
+            1）TCP层：ip_local_port_range (参考/proc/sys/net/ipv4/ip_local_port_range)，可调整，最大65535-1024
+            2）系统限制：最大文件句柄数（参考/etc/security/limits.conf），可调整，最大21亿
+            3）资源限制：内存等资源有限，例如连接本身占用资源，Netty本身的socket相关的对象也占用jvm，需要根据机器做测试
 
 （2）对于服务器而言：
     理论值： 最大连接数 = 客户端数量（IP地址数量） * 单个客户端的最多连接数（约64K）
@@ -37,7 +37,7 @@
     -       bash: ulimit: open files: cannot modify limit: Operation not permitted
     所以如果想改的更大，这需要修改这个参数（默认百万：1048576（1024 * 1024））：
         sysctl -w fs.nr_open=100000000
-    那这参数最大值，可以到多少呢？2147483584
+    那这参数最大值，可以到多少呢？2147483584 （即7FFFFFC0，也就是在MAXINT（2147483647）基础上按64字节对齐）
         [root@netty ~]# sysctl -w fs.nr_open=2147483584
             fs.nr_open = 2147483584
         [root@netty ~]# sysctl -w fs.nr_open=2147483585
