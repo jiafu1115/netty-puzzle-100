@@ -28,4 +28,14 @@
 
 （2）服务器支持1200万连接的案例：
     https://mrotaru.wordpress.com/2013/06/20/12-million-concurrent-connections-with-migratorydata-websocket-server/
+ (3) 最大文件句柄数的最大值受另外一个参数控制：
+    [root@netty ~]# cat /proc/sys/fs/nr_open
+        1048576
+    设置超过的话：
+    [root@netty ~]# ulimit -Hn 9000000
+-       bash: ulimit: open files: cannot modify limit: Operation not permitted
+    所以如果想改的更大，这需要修改这个参数：sysctl -w fs.nr_open=100000000
+
+     
+
 
