@@ -1,0 +1,31 @@
+这个问题其实不是 Netty 专属问题，类似问题：一个服务器或者客户端能创建多少连接，以 linux 为例：
+
+一个连接是由：客户端【IP + PORT】+ 服务器 【IP（固定的） + PORT（固定的）】 四个元素决定的，所以支持多少，要从两个角度分析：
+
+（1）对于单个客户端（IP地址固定）而言：
+    理论值：单个客户端连接到一个服务器最多连接数取决于本地可用端口数（因为其他3个元素固定了）： 65535（报文中端口占用字节数是16，所以最大端口数65535）- 1024(保留端口，不给用) 约 64K。
+    实际值：取决于以下三个方面：
+            1）ip_local_port_range (参考/proc/sys/net/ipv4/ip_local_port_range)，可调整;
+            2）最大文件句柄数（参考/etc/security/limits.conf），可调整;
+            3）内存等资源限制。
+
+（2）对于服务器而言：
+	  理论值： 最大连接数 = 客户端数量 * 单个客户端的最多连接数（约64K）
+    实际值： 受限于两个方面：
+            1）最大文件句柄数（参考/etc/security/limits.conf），可调整
+            2）内存等资源限制。
+
+总结：单纯看连接多少意义不是很大，因为连接是为了做事情，光能连上很多，但是占用资源过大导致基本已经不能动弹的话，意义就不大了，不过这个问题本身有趣。
+
+
+扩展：
+
+（1）查看ip_local_port_range方法：
+    [root@netty ~]# cat /proc/sys/net/ipv4/ip_local_port_range
+    16384	61000
+    [root@netty ~]#  sysctl net.ipv4.ip_local_port_range
+    net.ipv4.ip_local_port_range = 16384	61000
+
+（2）服务器支持1200万连接的案例：
+    https://mrotaru.wordpress.com/2013/06/20/12-million-concurrent-connections-with-migratorydata-websocket-server/
+
