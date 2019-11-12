@@ -42,6 +42,7 @@
             fs.nr_open = 2147483584
         [root@netty ~]# sysctl -w fs.nr_open=2147483585
             error: "Invalid argument" setting key "fs.nr_open"
+ （4）linux系统下，一个socket连接一般占用3K,所以100万连接至少需要3G，而1000万就要30G了，所以可以看下（2）引用连接文章里的内存大小，很大。
 
 
 
